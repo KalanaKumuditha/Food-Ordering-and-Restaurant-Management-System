@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  ActivityIndicator, Alert, RefreshControl
+  ActivityIndicator, Alert, RefreshControl, Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../../api/axios';
@@ -47,24 +47,30 @@ const OwnerReservationsScreen = () => {
   };
 
   const updateStatus = (id, newStatus) => {
-    Alert.alert(
-      `Mark as ${newStatus}`,
-      `Set this reservation status to "${newStatus}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Confirm',
-          onPress: async () => {
-            try {
-              await api.put(`/reservations/${id}/status`, { reservationStatus: newStatus }, authConfig);
-              loadData();
-            } catch (error) {
-              Alert.alert('Error', error.response?.data?.message || 'Could not update status.');
-            }
-          }
-        }
-      ]
-    );
+    const doUpdate = async () => {
+      try {
+        await api.put(`/reservations/${id}/status`, { reservationStatus: newStatus }, authConfig);
+        loadData();
+      } catch (error) {
+        Alert.alert('Error', error.response?.data?.message || 'Could not update status.');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirm = window.confirm(`Set this reservation status to "${newStatus}"?`);
+      if (confirm) {
+        doUpdate();
+      }
+    } else {
+      Alert.alert(
+        `Mark as ${newStatus}`,
+        `Set this reservation status to "${newStatus}"?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Confirm', onPress: doUpdate }
+        ]
+      );
+    }
   };
 
   const renderReservation = ({ item }) => {

@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  ActivityIndicator, Alert
+  ActivityIndicator, Alert, Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../../api/axios';
@@ -41,26 +41,31 @@ const MyReservationsScreen = () => {
   };
 
   const cancelReservation = (id) => {
-    Alert.alert(
-      'Cancel Reservation',
-      'Are you sure you want to cancel this reservation?',
-      [
-        { text: 'Keep it', style: 'cancel' },
-        {
-          text: 'Cancel Reservation',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await api.put(`/reservations/${id}/cancel`, {}, authConfig);
-              Alert.alert('Cancelled', 'Your reservation has been cancelled.');
-              fetchReservations();
-            } catch (error) {
-              Alert.alert('Error', error.response?.data?.message || 'Could not cancel reservation.');
-            }
-          }
-        }
-      ]
-    );
+    const doCancel = async () => {
+      try {
+        await api.put(`/reservations/${id}/cancel`, {}, authConfig);
+        Alert.alert('Cancelled', 'Your reservation has been cancelled.');
+        fetchReservations();
+      } catch (error) {
+        Alert.alert('Error', error.response?.data?.message || 'Could not cancel reservation.');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirm = window.confirm('Are you sure you want to cancel this reservation?');
+      if (confirm) {
+        doCancel();
+      }
+    } else {
+      Alert.alert(
+        'Cancel Reservation',
+        'Are you sure you want to cancel this reservation?',
+        [
+          { text: 'Keep it', style: 'cancel' },
+          { text: 'Cancel Reservation', style: 'destructive', onPress: doCancel }
+        ]
+      );
+    }
   };
 
   const renderReservation = ({ item }) => {

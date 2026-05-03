@@ -86,6 +86,26 @@ const DeliveryDashboardScreen = ({ navigation }) => {
     return null;
   };
 
+  const handleUpdateStatus = (deliveryId, nextStatus) => {
+    const doUpdate = () => updateDeliveryStatus(deliveryId, nextStatus);
+
+    if (Platform.OS === 'web') {
+      const confirm = window.confirm(`Mark this delivery as "${nextStatus}"?`);
+      if (confirm) {
+        doUpdate();
+      }
+    } else {
+      Alert.alert(
+        'Update Status',
+        `Mark this delivery as "${nextStatus}"?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Confirm', onPress: doUpdate }
+        ]
+      );
+    }
+  };
+
   const activeCount = myDeliveries.filter(d => d.deliveryStatus !== 'Completed' && d.deliveryStatus !== 'Cancelled').length;
   const completedCount = myDeliveries.filter(d => d.deliveryStatus === 'Completed').length;
 
@@ -132,16 +152,7 @@ const DeliveryDashboardScreen = ({ navigation }) => {
         {nextStatus && item.deliveryStatus !== 'Cancelled' && (
           <TouchableOpacity
             style={[styles.actionBtn, { backgroundColor: getStatusColor(nextStatus) }]}
-            onPress={() =>
-              Alert.alert(
-                'Update Status',
-                `Mark this delivery as "${nextStatus}"?`,
-                [
-                  { text: 'Cancel', style: 'cancel' },
-                  { text: 'Confirm', onPress: () => updateDeliveryStatus(item._id, nextStatus) }
-                ]
-              )
-            }
+            onPress={() => handleUpdateStatus(item._id, nextStatus)}
           >
             <Ionicons name="arrow-forward-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
             <Text style={styles.actionBtnText}>Mark as {nextStatus}</Text>
@@ -159,25 +170,31 @@ const DeliveryDashboardScreen = ({ navigation }) => {
   };
 
   const claimDelivery = async (deliveryId) => {
-    Alert.alert(
-      'Accept Delivery',
-      'Do you want to accept this delivery?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Accept',
-          onPress: async () => {
-            try {
-              await api.put(`/deliveries/${deliveryId}/claim`, {}, authConfig);
-              Alert.alert('Success', 'Delivery accepted! Check your My Deliveries tab.');
-              fetchDeliveries();
-            } catch (error) {
-              Alert.alert('Error', error.response?.data?.message || 'Failed to claim delivery');
-            }
-          }
-        }
-      ]
-    );
+    const doClaim = async () => {
+      try {
+        await api.put(`/deliveries/${deliveryId}/claim`, {}, authConfig);
+        Alert.alert('Success', 'Delivery accepted! Check your My Deliveries tab.');
+        fetchDeliveries();
+      } catch (error) {
+        Alert.alert('Error', error.response?.data?.message || 'Failed to claim delivery');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirm = window.confirm('Do you want to accept this delivery?');
+      if (confirm) {
+        doClaim();
+      }
+    } else {
+      Alert.alert(
+        'Accept Delivery',
+        'Do you want to accept this delivery?',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Accept', onPress: doClaim }
+        ]
+      );
+    }
   };
 
   const renderAvailableCard = ({ item }) => (

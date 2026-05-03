@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, FlatList, TouchableOpacity,
-  ActivityIndicator, RefreshControl, Alert
+  ActivityIndicator, RefreshControl, Alert, Platform
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../../api/axios';
@@ -49,23 +49,30 @@ const OwnerOrdersScreen = () => {
     if (idx < 0 || idx >= flow.length - 1) return;
     const nextStatus = flow[idx + 1];
 
-    Alert.alert(
-      'Update Order',
-      `Move order to "${nextStatus}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Confirm', onPress: async () => {
-            try {
-              await api.put(`/orders/${order._id}/status`, { orderStatus: nextStatus }, authConfig);
-              loadOrders();
-            } catch (err) {
-              Alert.alert('Error', err.response?.data?.message || 'Failed to update.');
-            }
-          }
-        }
-      ]
-    );
+    const doUpdate = async () => {
+      try {
+        await api.put(`/orders/${order._id}/status`, { orderStatus: nextStatus }, authConfig);
+        loadOrders();
+      } catch (err) {
+        Alert.alert('Error', err.response?.data?.message || 'Failed to update.');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirm = window.confirm(`Move order to "${nextStatus}"?`);
+      if (confirm) {
+        doUpdate();
+      }
+    } else {
+      Alert.alert(
+        'Update Order',
+        `Move order to "${nextStatus}"?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Confirm', onPress: doUpdate }
+        ]
+      );
+    }
   };
 
   const activeOrders  = orders.filter(o => !['Delivered','Served','Cancelled'].includes(o.orderStatus));
