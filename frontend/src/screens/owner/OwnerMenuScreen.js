@@ -29,9 +29,10 @@ const OwnerMenuScreen = () => {
       const rest = restRes.data.data;
       setRestaurant(rest);
 
+      const timestamp = new Date().getTime();
       const [catRes, menuRes] = await Promise.all([
-        api.get('/categories').catch(() => ({ data: { data: [] } })),
-        api.get(`/menu/restaurant/${rest._id}`).catch(() => ({ data: { data: [] } }))
+        api.get(`/categories?t=${timestamp}`).catch(() => ({ data: { data: [] } })),
+        api.get(`/menu/restaurant/${rest._id}?t=${timestamp}`).catch(() => ({ data: { data: [] } }))
       ]);
 
       const cats = catRes.data.data || [];
@@ -139,11 +140,11 @@ const OwnerMenuScreen = () => {
   const openEditForm = (item) => {
     setEditingItem(item);
     setForm({
-      foodName: item.foodName,
-      description: item.description,
-      price: item.price.toString(),
+      foodName: item.foodName || '',
+      description: item.description || '',
+      price: item.price ? item.price.toString() : '0',
       categoryId: item.categoryId?._id || item.categoryId,
-      preparationTime: item.preparationTime.toString()
+      preparationTime: item.preparationTime ? item.preparationTime.toString() : '15'
     });
     setImage(null);
   };
