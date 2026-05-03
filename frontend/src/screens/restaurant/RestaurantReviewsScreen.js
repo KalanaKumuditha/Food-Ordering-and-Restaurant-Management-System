@@ -62,13 +62,13 @@ const RestaurantReviewsScreen = ({ route, navigation }) => {
       formData.append('reviewText', reviewText);
 
       if (photo) {
-        const filename = photo.split('/').pop();
+        const filename = photo.split('/').pop() || 'upload.jpg';
         const match = /\.(\w+)$/.exec(filename);
-        const type = match ? `image/${match[1]}` : `image`;
+        const type = match ? `image/${match[1]}` : `image/jpeg`;
         if (Platform.OS === 'web') {
            const response = await fetch(photo);
            const blob = await response.blob();
-           formData.append('photo', blob, filename || 'upload.jpg');
+           formData.append('photo', blob, 'upload.jpg');
         } else {
            formData.append('photo', { uri: photo, name: filename, type });
         }

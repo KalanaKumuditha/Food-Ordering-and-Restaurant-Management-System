@@ -18,7 +18,7 @@ const PremiumButton = ({
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
       toValue: 0.96,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start();
   };
 
@@ -26,7 +26,7 @@ const PremiumButton = ({
     Animated.spring(scaleAnim, {
       toValue: 1,
       friction: 4,
-      useNativeDriver: true,
+      useNativeDriver: false,
     }).start();
   };
 

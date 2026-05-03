@@ -110,14 +110,15 @@ const OwnerDashboardScreen = ({ navigation }) => {
       formData.append('chairsPerTable', Number(form.chairsPerTable) || 0);
 
       if (image) {
-        const filename = image.split('/').pop();
+        const filename = image.split('/').pop() || 'upload.jpg';
         const match = /\.(\w+)$/.exec(filename);
-        const type = match ? `image/${match[1]}` : `image`;
+        const type = match ? `image/${match[1]}` : `image/jpeg`;
         
         if (Platform.OS === 'web') {
              const response = await fetch(image);
              const blob = await response.blob();
-             formData.append('image', blob, filename || 'upload.jpg');
+             // Force a valid extension on web to pass backend validation
+             formData.append('image', blob, 'upload.jpg');
         } else {
              formData.append('image', { uri: image, name: filename, type });
         }

@@ -90,14 +90,14 @@ const OwnerMenuScreen = () => {
       }
 
       if (image) {
-        const filename = image.split('/').pop();
+        const filename = image.split('/').pop() || 'upload.jpg';
         const match = /\.(\w+)$/.exec(filename);
-        const type = match ? `image/${match[1]}` : `image`;
+        const type = match ? `image/${match[1]}` : `image/jpeg`;
         
         if (Platform.OS === 'web') {
              const response = await fetch(image);
              const blob = await response.blob();
-             formData.append('image', blob, filename || 'food.jpg');
+             formData.append('image', blob, 'upload.jpg');
         } else {
              formData.append('image', { uri: image, name: filename, type });
         }

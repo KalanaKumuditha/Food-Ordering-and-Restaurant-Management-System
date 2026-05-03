@@ -44,10 +44,17 @@ const EditRestaurantScreen = ({ route, navigation }) => {
 
       if (coverImage) {
         let localUri = coverImage.uri;
-        let filename = localUri.split('/').pop();
+        let filename = localUri.split('/').pop() || 'upload.jpg';
         let match = /\.(\w+)$/.exec(filename);
-        let type = match ? `image/${match[1]}` : `image`;
-        formData.append('coverImage', { uri: localUri, name: filename, type });
+        let type = match ? `image/${match[1]}` : `image/jpeg`;
+        
+        if (Platform.OS === 'web') {
+             const response = await fetch(localUri);
+             const blob = await response.blob();
+             formData.append('coverImage', blob, 'upload.jpg');
+        } else {
+             formData.append('coverImage', { uri: localUri, name: filename, type });
+        }
       }
 
       await api.put(`/restaurants/${restaurant._id}`, formData, {
