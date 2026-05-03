@@ -122,7 +122,7 @@ exports.updateMenuItem = async (req, res) => {
     }
 
     menuItem = await MenuItem.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true
     });
 

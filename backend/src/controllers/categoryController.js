@@ -115,7 +115,7 @@ exports.updateCategory = async (req, res) => {
     }
 
     category = await Category.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
+      returnDocument: 'after',
       runValidators: true
     });
 
