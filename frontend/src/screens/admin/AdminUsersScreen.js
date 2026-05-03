@@ -43,26 +43,31 @@ const AdminUsersScreen = ({ navigation }) => {
   );
 
   const deleteUser = async (userId, userName) => {
-    Alert.alert(
-      'Delete User',
-      `Are you sure you want to delete ${userName}? This action cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await api.delete(`/auth/users/${userId}`, authConfig);
-              Alert.alert('Success', 'User deleted successfully');
-              fetchUsers(); // Refresh the list
-            } catch (error) {
-              Alert.alert('Error', error.response?.data?.message || 'Failed to delete user');
-            }
-          }
-        }
-      ]
-    );
+    const doDelete = async () => {
+      try {
+        await api.delete(`/auth/users/${userId}`, authConfig);
+        Alert.alert('Success', 'User deleted successfully');
+        fetchUsers(); // Refresh the list
+      } catch (error) {
+        Alert.alert('Error', error.response?.data?.message || 'Failed to delete user');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirm = window.confirm(`Are you sure you want to delete ${userName}? This action cannot be undone.`);
+      if (confirm) {
+        doDelete();
+      }
+    } else {
+      Alert.alert(
+        'Delete User',
+        `Are you sure you want to delete ${userName}? This action cannot be undone.`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: doDelete }
+        ]
+      );
+    }
   };
 
   const renderUserCard = ({ item }) => {
