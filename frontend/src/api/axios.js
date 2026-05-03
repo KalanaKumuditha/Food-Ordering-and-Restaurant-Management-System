@@ -3,21 +3,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform, NativeModules } from 'react-native';
 
 const envBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
-const getMetroHostBaseUrl = () => {
-  const scriptURL = NativeModules?.SourceCode?.scriptURL || '';
-  const match = scriptURL.match(/https?:\/\/([^/:]+)(?::\d+)?/);
+const deployedUrl = 'https://food-ordering-and-restaurant-management.onrender.com';
 
-  if (!match?.[1]) {
-    return null;
-  }
-
-  return `http://${match[1]}:5000`;
-};
-
-const metroHostBaseUrl = getMetroHostBaseUrl();
-const localBaseUrl = Platform.OS === 'android' ? 'http://10.0.2.2:5000' : 'http://localhost:5000';
-
-export const API_BASE_URL = (envBaseUrl || metroHostBaseUrl || localBaseUrl).replace(/\/+$/, '');
+export const API_BASE_URL = (envBaseUrl || deployedUrl).replace(/\/+$/, '');
 const API_URL = `${API_BASE_URL}/api`;
 
 console.log('====================================');
