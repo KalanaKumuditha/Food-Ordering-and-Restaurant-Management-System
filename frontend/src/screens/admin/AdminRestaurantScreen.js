@@ -68,14 +68,21 @@ const AdminRestaurantScreen = ({ navigation }) => {
   };
 
   const confirmAction = (restaurantId, newStatus, restaurantName) => {
-    Alert.alert(
-      `${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)} Restaurant`,
-      `Are you sure you want to ${newStatus} "${restaurantName}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Confirm', onPress: () => updateStatus(restaurantId, newStatus) }
-      ]
-    );
+    if (Platform.OS === 'web') {
+      const confirm = window.confirm(`Are you sure you want to ${newStatus} "${restaurantName}"?`);
+      if (confirm) {
+        updateStatus(restaurantId, newStatus);
+      }
+    } else {
+      Alert.alert(
+        `${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)} Restaurant`,
+        `Are you sure you want to ${newStatus} "${restaurantName}"?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Confirm', onPress: () => updateStatus(restaurantId, newStatus) }
+        ]
+      );
+    }
   };
 
   const filteredRestaurants = activeFilter === 'all'

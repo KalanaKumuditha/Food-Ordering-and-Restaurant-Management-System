@@ -158,26 +158,31 @@ const OwnerMenuScreen = () => {
   };
 
   const deleteMenuItem = (item) => {
-    Alert.alert(
-      'Delete Menu Item',
-      `Are you sure you want to delete "${item.foodName}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { 
-          text: 'Delete', 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await api.delete(`/menu/${item._id}`, authConfig);
-              await loadData();
-              Alert.alert('Success', 'Item deleted successfully');
-            } catch (error) {
-              Alert.alert('Error', error.response?.data?.message || 'Failed to delete item.');
-            }
-          }
-        }
-      ]
-    );
+    const doDelete = async () => {
+      try {
+        await api.delete(`/menu/${item._id}`, authConfig);
+        await loadData();
+        Alert.alert('Success', 'Item deleted successfully');
+      } catch (error) {
+        Alert.alert('Error', error.response?.data?.message || 'Failed to delete item.');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirm = window.confirm(`Are you sure you want to delete "${item.foodName}"?`);
+      if (confirm) {
+        doDelete();
+      }
+    } else {
+      Alert.alert(
+        'Delete Menu Item',
+        `Are you sure you want to delete "${item.foodName}"?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: doDelete }
+        ]
+      );
+    }
   };
 
   // Get category name from ID

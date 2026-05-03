@@ -92,26 +92,31 @@ const AdminCategoryScreen = ({ navigation }) => {
   };
 
   const handleDelete = (category) => {
-    Alert.alert(
-      'Delete Category',
-      `Are you sure you want to delete "${category.categoryName}"?\nMenu items using this category will keep their reference.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await api.delete(`/categories/${category._id}`, authConfig);
-              Alert.alert('Deleted', 'Category removed successfully.');
-              loadCategories();
-            } catch (error) {
-              Alert.alert('Error', error.response?.data?.message || 'Failed to delete.');
-            }
-          },
-        },
-      ]
-    );
+    const doDelete = async () => {
+      try {
+        await api.delete(`/categories/${category._id}`, authConfig);
+        Alert.alert('Deleted', 'Category removed successfully.');
+        loadCategories();
+      } catch (error) {
+        Alert.alert('Error', error.response?.data?.message || 'Failed to delete.');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      const confirm = window.confirm(`Are you sure you want to delete "${category.categoryName}"?\nMenu items using this category will keep their reference.`);
+      if (confirm) {
+        doDelete();
+      }
+    } else {
+      Alert.alert(
+        'Delete Category',
+        `Are you sure you want to delete "${category.categoryName}"?\nMenu items using this category will keep their reference.`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Delete', style: 'destructive', onPress: doDelete },
+        ]
+      );
+    }
   };
 
   if (loading) {
