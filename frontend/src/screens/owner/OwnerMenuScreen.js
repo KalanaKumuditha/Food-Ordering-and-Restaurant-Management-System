@@ -104,21 +104,16 @@ const OwnerMenuScreen = () => {
         }
       }
 
+      const uploadHeaders = { ...authConfig.headers };
+      if (Platform.OS !== 'web') {
+        uploadHeaders['Content-Type'] = 'multipart/form-data';
+      }
+
       if (editingItem) {
-        await api.put(`/menu/${editingItem._id}`, formData, {
-          headers: {
-            ...authConfig.headers,
-            'Content-Type': 'multipart/form-data',
-          }
-        });
+        await api.put(`/menu/${editingItem._id}`, formData, { headers: uploadHeaders });
         Alert.alert('Success', 'Menu item updated successfully.');
       } else {
-        await api.post('/menu', formData, {
-          headers: {
-            ...authConfig.headers,
-            'Content-Type': 'multipart/form-data',
-          }
-        });
+        await api.post('/menu', formData, { headers: uploadHeaders });
         Alert.alert('Success', 'Menu item added successfully.');
       }
 

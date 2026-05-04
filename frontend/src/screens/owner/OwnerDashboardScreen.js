@@ -124,12 +124,11 @@ const OwnerDashboardScreen = ({ navigation }) => {
         }
       }
 
-      await api.post('/restaurants', formData, {
-        headers: {
-          ...authConfig.headers,
-          'Content-Type': 'multipart/form-data',
-        }
-      });
+      const uploadHeaders = { ...authConfig.headers };
+      if (Platform.OS !== 'web') {
+        uploadHeaders['Content-Type'] = 'multipart/form-data';
+      }
+      await api.post('/restaurants', formData, { headers: uploadHeaders });
       alert('Restaurant profile submitted for admin approval.');
       setLoading(true);
       await loadOwnerData();

@@ -17,27 +17,35 @@ const RegisterScreen = ({ navigation, route }) => {
   const [phone, setPhone] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const showAlert = (title, message) => {
+    if (Platform.OS === 'web') {
+      window.alert(`${title}\n\n${message}`);
+    } else {
+      Alert.alert(title, message);
+    }
+  };
+
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword || !phone) {
-      Alert.alert('Error', 'Please fill in all fields');
+      showAlert('Error', 'Please fill in all fields');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      showAlert('Error', 'Passwords do not match');
       return;
     }
 
     setIsLoading(true);
     try {
       await api.post('/auth/register', { name, email, password, phone, role: selectedRole });
-      Alert.alert('Success', 'Account created successfully! Please login.');
+      showAlert('Success', 'Account created successfully! Please login.');
       navigation.navigate('Login');
     } catch (err) {
       if (err.message === 'Network Error') {
-        Alert.alert('Registration Failed', `Cannot connect to server.\nCurrent API: ${API_BASE_URL}\n\nMake sure backend is running and phone + PC are on same Wi-Fi.`);
+        showAlert('Registration Failed', `Cannot connect to server.\nCurrent API: ${API_BASE_URL}\n\nMake sure backend is running and phone + PC are on same Wi-Fi.`);
       } else {
-        Alert.alert('Registration Failed', err.response?.data?.message || err.message || 'Something went wrong');
+        showAlert('Registration Failed', err.response?.data?.message || err.message || 'Something went wrong');
       }
     } finally {
       setIsLoading(false);

@@ -74,12 +74,11 @@ const RestaurantReviewsScreen = ({ route, navigation }) => {
         }
       }
 
-      await api.post('/reviews', formData, {
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          'Content-Type': 'multipart/form-data',
-        }
-      });
+      const uploadHeaders = { Authorization: `Bearer ${userToken}` };
+      if (Platform.OS !== 'web') {
+        uploadHeaders['Content-Type'] = 'multipart/form-data';
+      }
+      await api.post('/reviews', formData, { headers: uploadHeaders });
 
       Alert.alert('Success', 'Your review has been submitted!');
       setShowModal(false);

@@ -57,18 +57,26 @@ const EditRestaurantScreen = ({ route, navigation }) => {
         }
       }
 
-      await api.put(`/restaurants/${restaurant._id}`, formData, {
-        headers: { 
-          Authorization: `Bearer ${userToken}`,
-          'Content-Type': 'multipart/form-data',
-        }
-      });
+      const uploadHeaders = { Authorization: `Bearer ${userToken}` };
+      if (Platform.OS !== 'web') {
+        uploadHeaders['Content-Type'] = 'multipart/form-data';
+      }
+      await api.put(`/restaurants/${restaurant._id}`, formData, { headers: uploadHeaders });
 
-      Alert.alert('Success', 'Restaurant details updated successfully!', [
-        { text: 'OK', onPress: () => navigation.goBack() }
-      ]);
+      if (Platform.OS === 'web') {
+        window.alert('Restaurant details updated successfully!');
+        navigation.goBack();
+      } else {
+        Alert.alert('Success', 'Restaurant details updated successfully!', [
+          { text: 'OK', onPress: () => navigation.goBack() }
+        ]);
+      }
     } catch (error) {
-      Alert.alert('Update Failed', error.response?.data?.message || 'Something went wrong');
+      if (Platform.OS === 'web') {
+        window.alert(error.response?.data?.message || 'Something went wrong');
+      } else {
+        Alert.alert('Update Failed', error.response?.data?.message || 'Something went wrong');
+      }
     } finally {
       setLoading(false);
     }
