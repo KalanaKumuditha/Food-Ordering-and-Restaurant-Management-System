@@ -5,6 +5,37 @@ import { AuthContext } from '../../context/AuthContext';
 import api from '../../api/axios';
 import { Ionicons } from '@expo/vector-icons';
 
+// --- Reusable Time Picker Modal (defined outside component to prevent remount crashes on web) --- //
+const TimePickerModal = ({ visible, onClose, onSelect, slots, title, selected }) => (
+  <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <View style={styles.modalOverlay}>
+      <View style={styles.modalSheet}>
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>{title}</Text>
+          <TouchableOpacity onPress={onClose}><Ionicons name="close" size={24} color="#000" /></TouchableOpacity>
+        </View>
+        <FlatList
+          data={slots}
+          keyExtractor={item => item}
+          numColumns={3}
+          contentContainerStyle={{ padding: 12 }}
+          renderItem={({ item }) => {
+            const active = item === selected;
+            return (
+              <TouchableOpacity
+                style={[styles.slot, active && styles.slotActive]}
+                onPress={() => { onSelect(item); onClose(); }}
+              >
+                <Text style={[styles.slotText, active && styles.slotTextActive]}>{item}</Text>
+              </TouchableOpacity>
+            );
+          }}
+        />
+      </View>
+    </View>
+  </Modal>
+);
+
 const OwnerDashboardScreen = ({ navigation }) => {
   const { userInfo, userToken } = useContext(AuthContext);
   const [restaurant, setRestaurant] = useState(null);
@@ -44,9 +75,9 @@ const OwnerDashboardScreen = ({ navigation }) => {
         orderCount: orderRes.data.data?.length || 0
       });
     } catch (error) {
-      if (error.response?.status === 404) {
-        setRestaurant(null);
-      } else {
+      // Any error (404, network timeout, CORS, etc.) means no restaurant — show onboarding form
+      setRestaurant(null);
+      if (error.response?.status !== 404) {
         console.log('Owner dashboard load error:', error);
       }
     } finally {
@@ -144,37 +175,6 @@ const OwnerDashboardScreen = ({ navigation }) => {
       </View>
     );
   }
-
-  // --- Reusable Time Picker Modal --- //
-  const TimePickerModal = ({ visible, onClose, onSelect, slots, title, selected }) => (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalSheet}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{title}</Text>
-            <TouchableOpacity onPress={onClose}><Ionicons name="close" size={24} color="#000" /></TouchableOpacity>
-          </View>
-          <FlatList
-            data={slots}
-            keyExtractor={item => item}
-            numColumns={3}
-            contentContainerStyle={{ padding: 12 }}
-            renderItem={({ item }) => {
-              const active = item === selected;
-              return (
-                <TouchableOpacity
-                  style={[styles.slot, active && styles.slotActive]}
-                  onPress={() => { onSelect(item); onClose(); }}
-                >
-                  <Text style={[styles.slotText, active && styles.slotTextActive]}>{item}</Text>
-                </TouchableOpacity>
-              );
-            }}
-          />
-        </View>
-      </View>
-    </Modal>
-  );
 
   if (!restaurant) {
     return (
